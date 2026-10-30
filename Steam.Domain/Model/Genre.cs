@@ -13,7 +13,7 @@ public class Genre
     [Column("id")]
     public int Id { get; set; }
     [Column("name")]
-    public string Name { get; set; }
+    public string Name { get; set; } = string.Empty;
     [Column("game_genres")]
     public ICollection<GameGenre> GameGenres { get; set; } = [];
 }

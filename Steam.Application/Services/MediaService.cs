@@ -13,15 +13,19 @@ public class MediaService : IMediaService
 {
     private readonly IMediaRepository _repo;
     private readonly IMapper _mapper;
+    private readonly IGameAccessService _access;
 
-    public MediaService(IMediaRepository repo, IMapper mapper)
+    public MediaService(IMediaRepository repo, IMapper mapper, IGameAccessService access)
     {
         _repo = repo;
         _mapper = mapper;
+        _access = access;
     }
 
     public async Task<MediaDTO> CreateAsync(MediaCreateDTO dto, CancellationToken ct)
     {
+        if (dto.GameId.HasValue)
+            await _access.GetWritableAsync(dto.GameId.Value, ct);
         var media = _mapper.Map<Media>(dto);
         await _repo.AddAsync(media, ct);
         return _mapper.Map<MediaDTO>(media);

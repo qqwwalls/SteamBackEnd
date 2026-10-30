@@ -32,6 +32,7 @@ public class GameController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize]
     public async Task<IActionResult> Create([FromBody] GameCreateDTO dto, CancellationToken ct)
     {
         var game = await _service.CreateAsync(dto, ct);
@@ -39,6 +40,7 @@ public class GameController : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
+    [Authorize]
     public async Task<IActionResult> Update(Guid id, [FromBody] GameUpdateDTO dto, CancellationToken ct)
     {
         var game = await _service.UpdateAsync(id, dto, ct);

@@ -19,12 +19,19 @@ public class UserRepository : IUserRepository
 
     public async Task<User?> GetByIdAsync(Guid id, CancellationToken ct)
     {
-        return await _context.Users.FirstOrDefaultAsync(u => u.Id == id, ct);
+        return await _context.Users.Include(u => u.Avatar).FirstOrDefaultAsync(u => u.Id == id, ct);
     }
 
     public async Task<User?> GetByEmailAsync(string email, CancellationToken ct)
     {
-        return await _context.Users.FirstOrDefaultAsync(u => u.Email == email, ct);
+        var normalized = email.ToUpperInvariant();
+        return await _context.Users.Include(u => u.Avatar).FirstOrDefaultAsync(u => u.Email.ToUpper() == normalized, ct);
+    }
+
+    public async Task<User?> GetByUsernameAsync(string username, CancellationToken ct)
+    {
+        var normalized = username.ToUpperInvariant();
+        return await _context.Users.FirstOrDefaultAsync(u => u.Username.ToUpper() == normalized, ct);
     }
 
     public async Task AddAsync(User user, CancellationToken ct)

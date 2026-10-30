@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="Steam.Api.Tests/Steam.Api.Tests.csproj" />
   <Project Path="Steam.Api/Steam.Api.csproj" Id="348452ac-5f9a-4816-b604-511ebcfa9ae1" />
   <Project Path="Steam.Application/Steam.Application.csproj" Id="94ab1c68-44d0-4428-ab1a-3412bfafb5be" />
   <Project Path="Steam.Domain/Steam.Domain.csproj" />

@@ -13,15 +13,22 @@ public class AchievementService : IAchievementService
 {
     private readonly IAchievementRepository _repo;
     private readonly IMapper _mapper;
+    private readonly IGameAccessService _access;
+    private readonly IMediaRepository _media;
 
-    public AchievementService(IAchievementRepository repo, IMapper mapper)
+    public AchievementService(IAchievementRepository repo, IMapper mapper, IGameAccessService access, IMediaRepository media)
     {
         _repo = repo;
         _mapper = mapper;
+        _access = access;
+        _media = media;
     }
 
     public async Task<AchievementDTO> CreateAsync(AchievementCreateDTO dto, CancellationToken ct)
     {
+        await _access.GetWritableAsync(dto.GameId, ct);
+        if (dto.IconId.HasValue && await _media.GetByIdAsync(dto.IconId.Value, ct) == null)
+            throw new KeyNotFoundException("Achievement icon was not found.");
         var achievement = _mapper.Map<Achievement>(dto);
         await _repo.AddAsync(achievement, ct);
         return _mapper.Map<AchievementDTO>(achievement);

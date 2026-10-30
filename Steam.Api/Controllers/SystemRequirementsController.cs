@@ -19,6 +19,7 @@ public class SystemRequirementsController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize]
     public async Task<IActionResult> Create([FromBody] SystemRequirementsCreateDTO dto, CancellationToken ct)
     {
         var req = await _service.CreateAsync(dto, ct);

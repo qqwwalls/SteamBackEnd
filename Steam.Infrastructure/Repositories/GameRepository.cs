@@ -23,6 +23,7 @@ public class GameRepository : IGameRepository
             .Include(g => g.GameGenres)
             .Include(g => g.GameTags)
             .Include(g => g.Media)
+            .OrderBy(g => g.Name)
             .ToListAsync(ct);
     }
 
@@ -32,7 +33,15 @@ public class GameRepository : IGameRepository
             .Include(g => g.GameGenres)
             .Include(g => g.GameTags)
             .Include(g => g.Media)
+            .Include(g => g.Developer)
+            .Include(g => g.SystemRequirements)
+            .Include(g => g.Achievements)
             .FirstOrDefaultAsync(g => g.Id == id, ct);
+    }
+
+    public async Task<List<Game>> GetByIdsAsync(IEnumerable<Guid> ids, CancellationToken ct)
+    {
+        return await _context.Games.Include(g => g.Media).Where(g => ids.Contains(g.Id)).ToListAsync(ct);
     }
 
     public async Task AddAsync(Game game, CancellationToken ct)

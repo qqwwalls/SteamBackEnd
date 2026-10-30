@@ -9,6 +9,7 @@ public interface IGameRepository
 {
     Task<IEnumerable<Game>> GetAllAsync(CancellationToken ct);
     Task<Game?> GetByIdAsync(Guid id, CancellationToken ct);
+    Task<List<Game>> GetByIdsAsync(IEnumerable<Guid> ids, CancellationToken ct);
     Task AddAsync(Game game, CancellationToken ct);
     Task UpdateAsync(Game game, CancellationToken ct);
 }

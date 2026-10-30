@@ -19,6 +19,7 @@ public class AchievementController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize]
     public async Task<IActionResult> Create([FromBody] AchievementCreateDTO dto, CancellationToken ct)
     {
         var achievement = await _service.CreateAsync(dto, ct);

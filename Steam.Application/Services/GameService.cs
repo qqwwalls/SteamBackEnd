@@ -15,21 +15,35 @@ public class GameService : IGameService
     private readonly IGenreRepository _genreRepo;
     private readonly ITagRepository _tagRepo;
     private readonly IMapper _mapper;
+    private readonly IUserRepository _users;
+    private readonly ICurrentUserService _currentUser;
+    private readonly IGameAccessService _access;
 
     public GameService(
         IGameRepository repo,
         IGenreRepository genreRepo,
         ITagRepository tagRepo,
-        IMapper mapper)
+        IMapper mapper,
+        IUserRepository users,
+        ICurrentUserService currentUser,
+        IGameAccessService access)
     {
         _repo = repo;
         _genreRepo = genreRepo;
         _tagRepo = tagRepo;
         _mapper = mapper;
+        _users = users;
+        _currentUser = currentUser;
+        _access = access;
     }
 
     public async Task<GameDTO> CreateAsync(GameCreateDTO dto, CancellationToken ct)
     {
+        if (!_currentUser.IsAdmin && dto.DeveloperId != _currentUser.UserId)
+            throw new UnauthorizedAccessException();
+        if (await _users.GetByIdAsync(dto.DeveloperId, ct) == null)
+            throw new KeyNotFoundException("Developer was not found.");
+
         var game = new Game
         {
             Name = dto.Title,
@@ -43,13 +57,14 @@ public class GameService : IGameService
         {
             var genres = await _genreRepo.GetAllAsync(ct);
             var selectedGenres = genres.Where(g => dto.GenreIds.Contains(g.Id)).ToList();
+            if (selectedGenres.Count != dto.GenreIds.Distinct().Count())
+                throw new ArgumentException("One or more genres do not exist.");
 
             foreach (var genre in selectedGenres)
             {
                 game.GameGenres.Add(new GameGenre
                 {
-                    GenreId = genre.Id,
-                    Genre = genre
+                    GenreId = genre.Id
                 });
             }
         }
@@ -58,13 +73,14 @@ public class GameService : IGameService
         {
             var tags = await _tagRepo.GetAllAsync(ct);
             var selectedTags = tags.Where(t => dto.TagIds.Contains(t.Id)).ToList();
+            if (selectedTags.Count != dto.TagIds.Distinct().Count())
+                throw new ArgumentException("One or more tags do not exist.");
 
             foreach (var tag in selectedTags)
             {
                 game.GameTags.Add(new GameTag
                 {
-                    TagId = tag.Id,
-                    Tag = tag
+                    TagId = tag.Id
                 });
             }
         }
@@ -80,6 +96,7 @@ public class GameService : IGameService
         if (game == null)
             return null;
 
+        await _access.GetWritableAsync(id, ct);
         _mapper.Map(dto, game);
         await _repo.UpdateAsync(game, ct);
 

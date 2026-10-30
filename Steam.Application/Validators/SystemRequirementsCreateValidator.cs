@@ -11,6 +11,7 @@ public class SystemRequirementsCreateValidator : AbstractValidator<SystemRequire
     public SystemRequirementsCreateValidator()
     {
         RuleFor(x => x.GameId).NotEmpty();
+        RuleFor(x => x.Type).IsInEnum();
         RuleFor(x => x.Os).NotEmpty().WithMessage("Os обязательный");
     }
 }

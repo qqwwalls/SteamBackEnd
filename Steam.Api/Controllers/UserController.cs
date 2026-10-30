@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Steam.Application.DTOs.UserDTOs;
+using Microsoft.AspNetCore.Authorization;
 using Steam.Application.Interfaces.Services;
 
 namespace Steam.Api.Controllers;
@@ -16,6 +17,7 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
+    [Authorize]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
     {
         var user = await _service.GetByIdAsync(id, ct);
@@ -30,6 +32,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPut("{id:guid}/avatar")]
+    [Authorize]
     public async Task<IActionResult> UpdateAvatar(Guid id, [FromBody] UpdateAvatarDTO dto, CancellationToken ct)
     {
         var user = await _service.UpdateAvatarAsync(id, dto.AvatarUrl, ct);

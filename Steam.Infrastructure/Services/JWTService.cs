@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace Steam.Infrastructure.Services;
@@ -25,6 +26,7 @@ public class JWTService : IJWTService
         var claims = new List<Claim>
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
             new Claim(ClaimTypes.Name, user.Username),
             new Claim(ClaimTypes.Role, user.Role.ToString())
@@ -49,7 +51,7 @@ public class JWTService : IJWTService
         return new RefreshToken
         {
             UserId = userId,
-            Token = Convert.ToBase64String(Guid.NewGuid().ToByteArray()),
+            Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
             ExpiresAt = DateTime.UtcNow.AddDays(_settings.RefreshTokenLifetimeDays)
         };
     }

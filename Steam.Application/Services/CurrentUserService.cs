@@ -10,6 +10,7 @@ namespace Steam.Application.Services;
 public class CurrentUserService : ICurrentUserService
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
+    public bool IsAdmin => _httpContextAccessor.HttpContext?.User.IsInRole("Admin") == true;
 
     public CurrentUserService(IHttpContextAccessor httpContextAccessor)
     {
@@ -25,7 +26,9 @@ public class CurrentUserService : ICurrentUserService
                 .FindFirst(ClaimTypes.NameIdentifier)?
                 .Value;
 
-            return Guid.Parse(value!);
+            if (!Guid.TryParse(value, out var userId))
+                throw new UnauthorizedAccessException("An authenticated user is required.");
+            return userId;
         }
     }
 }

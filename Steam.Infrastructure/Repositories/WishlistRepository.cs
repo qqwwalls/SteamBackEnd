@@ -21,12 +21,14 @@ public class WishlistRepository : IWishlistRepository
         return await _context.UserWishlists
             .Where(w => w.UserId == userId)
             .Include(w => w.Game)
+            .ThenInclude(g => g.Media)
             .ToListAsync();
     }
     public async Task<UserWishlist?> GetAsync(Guid userId, Guid gameId)
     {
         return await _context.UserWishlists
             .Include(w => w.Game)
+            .ThenInclude(g => g.Media)
             .FirstOrDefaultAsync(w => w.UserId == userId && w.GameId == gameId);
     }
     public async Task AddAsync(UserWishlist wishlist)

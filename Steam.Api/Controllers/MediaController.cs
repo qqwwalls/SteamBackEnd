@@ -19,6 +19,7 @@ public class MediaController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize]
     public async Task<IActionResult> Create([FromBody] MediaCreateDTO dto, CancellationToken ct)
     {
         var media = await _service.CreateAsync(dto, ct);

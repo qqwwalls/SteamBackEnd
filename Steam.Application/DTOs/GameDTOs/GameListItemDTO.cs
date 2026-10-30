@@ -9,4 +9,7 @@ public class GameListItemDTO
     public Guid Id { get; set; }
     public string Title { get; set; } = string.Empty;
     public decimal Price { get; set; }
+    public string? CoverImageUrl { get; set; }
+    public string? BannerImageUrl { get; set; }
+    public DateTime ReleaseDate { get; set; }
 }

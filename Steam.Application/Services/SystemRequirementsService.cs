@@ -13,15 +13,18 @@ public class SystemRequirementsService : ISystemRequirementsService
 {
     private readonly ISystemRequirementsRepository _repo;
     private readonly IMapper _mapper;
+    private readonly IGameAccessService _access;
 
-    public SystemRequirementsService(ISystemRequirementsRepository repo, IMapper mapper)
+    public SystemRequirementsService(ISystemRequirementsRepository repo, IMapper mapper, IGameAccessService access)
     {
         _repo = repo;
         _mapper = mapper;
+        _access = access;
     }
 
     public async Task<SystemRequirementsDTO> CreateAsync(SystemRequirementsCreateDTO dto, CancellationToken ct)
     {
+        await _access.GetWritableAsync(dto.GameId, ct);
         var req = _mapper.Map<SystemRequirements>(dto);
         await _repo.AddAsync(req, ct);
         return _mapper.Map<SystemRequirementsDTO>(req);

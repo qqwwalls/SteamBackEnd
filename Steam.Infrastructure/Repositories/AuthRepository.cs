@@ -24,7 +24,7 @@ public class AuthRepository : IAuthRepository
 
     public async Task<User?> GetByIdAsync(Guid id, CancellationToken ct)
     {
-        return await _context.Users.FirstOrDefaultAsync(u => u.Id == id, ct);
+        return await _context.Users.Include(u => u.Avatar).FirstOrDefaultAsync(u => u.Id == id, ct);
     }
 
     public async Task AddUserAsync(User user, CancellationToken ct)
@@ -42,5 +42,26 @@ public class AuthRepository : IAuthRepository
     public async Task<RefreshToken?> GetRefreshTokenAsync(string token, CancellationToken ct)
     {
         return await _context.RefreshTokens.FirstOrDefaultAsync(t => t.Token == token, ct);
+    }
+
+    public async Task<bool> RotateRefreshTokenAsync(string token, RefreshToken replacement, CancellationToken ct)
+    {
+        await using var transaction = await _context.Database.BeginTransactionAsync(ct);
+        var updated = await _context.RefreshTokens
+            .Where(t => t.Token == token && !t.IsRevoked && t.ExpiresAt > DateTime.UtcNow)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(t => t.IsRevoked, true), ct);
+        if (updated == 0)
+            return false;
+
+        await _context.RefreshTokens.AddAsync(replacement, ct);
+        await _context.SaveChangesAsync(ct);
+        await transaction.CommitAsync(ct);
+        return true;
+    }
+
+    public async Task RevokeRefreshTokenAsync(string token, CancellationToken ct)
+    {
+        await _context.RefreshTokens.Where(t => t.Token == token)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(t => t.IsRevoked, true), ct);
     }
 }
